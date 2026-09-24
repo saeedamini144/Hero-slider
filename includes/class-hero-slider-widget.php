@@ -1563,7 +1563,7 @@ class Hero_Slider_Widget extends Widget_Base {
 							<?php endif; ?>
 
 							<?php if ( '' !== trim( (string) $slide['title'] ) ) : ?>
-								<<?php echo esc_html( $t_tag ); ?> class="hs-title"><?php echo nl2br( wp_kses_post( $slide['title'] ) ); ?><?php if ( $deco ) : ?><span class="hs-deco" aria-hidden="true"></span><?php endif; ?></<?php echo esc_html( $t_tag ); ?>>
+								<<?php echo esc_html( $t_tag ); ?> class="hs-title"><?php echo nl2br( wp_kses_post( $slide['title'] ) ); ?><?php if ( $deco ) : ?><?php endif; ?></<?php echo esc_html( $t_tag ); ?>>
 							<?php endif; ?>
 
 							<?php if ( '' !== trim( (string) $slide['description'] ) ) : ?>
@@ -1742,7 +1742,7 @@ class Hero_Slider_Widget extends Widget_Base {
 								<{{ stTag }} class="hs-subtitle">{{ slide.subtitle }}</{{ stTag }}>
 							<# } #>
 							<# if ( slide.title && slide.title.trim() ) { #>
-								<{{ tTag }} class="hs-title">{{{ nl2br( slide.title ) }}}<# if ( deco ) { #><span class="hs-deco" aria-hidden="true"></span><# } #></{{ tTag }}>
+								<{{ tTag }} class="hs-title">{{{ nl2br( slide.title ) }}}<# if ( deco ) { #><# } #></{{ tTag }}>
 							<# } #>
 							<# if ( slide.description && slide.description.trim() ) { #>
 								<div class="hs-desc">{{{ nl2br( slide.description ) }}}</div>

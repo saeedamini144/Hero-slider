@@ -5,8 +5,8 @@
  * Author: Saeed Amini
  * Author URI: https://github.com/saeedamini144
  * Version:           1.0.0
- * Requires at least: 7.4
- * Requires PHP:      8.0
+ * Requires PHP: 7.4
+ * Requires at least: 6.0
  * Requires Plugins:  elementor
  * Text Domain:       hero-slider
  * Elementor tested up to: 3.30.0

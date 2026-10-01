@@ -1,10 +1,11 @@
 <?php
 /**
  * Plugin Name:       Hero Slider for Elementor
+ * Plugin URI: https://github.com/saeedamini144/Hero-slider
  * Description:       ویجت اسلایدر هیرو سبک و بهینه برای المنتور؛ با افکت‌های متنوع تصویر، بندانگشتی، ناوبری و تنظیمات کامل استایل.
  * Author: Saeed Amini
  * Author URI: https://github.com/saeedamini144
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires PHP: 7.4
  * Requires at least: 6.0
  * Requires Plugins:  elementor
@@ -14,7 +15,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'HS_HERO_VERSION', '1.0.0' );
+define( 'HS_HERO_VERSION', '1.1.0' );
 define( 'HS_HERO_FILE', __FILE__ );
 define( 'HS_HERO_PATH', plugin_dir_path( __FILE__ ) );
 define( 'HS_HERO_URL', plugin_dir_url( __FILE__ ) );

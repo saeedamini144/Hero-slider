@@ -34,7 +34,7 @@
 	color: var(--hs-ink);
 }
 
-:where([dir="rtl"]) .hs-hero {
+.hs-hero:where([dir="rtl"]) {
 	--hs-fwd: -1;
 	--hs-start: right;
 	--hs-ov-side: left
@@ -124,11 +124,11 @@
 	animation-name: hs-in-slide-l
 }
 
-:where([dir="rtl"]) .hs-hero .hs-fx-slide.is-active {
+.hs-hero:where([dir="rtl"]) .hs-fx-slide.is-active {
 	animation-name: hs-in-slide-l
 }
 
-:where([dir="rtl"]) .hs-hero.is-back .hs-fx-slide.is-active {
+.hs-hero.is-back:where([dir="rtl"]) .hs-fx-slide.is-active {
 	animation-name: hs-in-slide-r
 }
 
@@ -148,11 +148,11 @@
 	animation-name: hs-in-wipe-l
 }
 
-:where([dir="rtl"]) .hs-hero .hs-fx-wipe.is-active {
+.hs-hero:where([dir="rtl"]) .hs-fx-wipe.is-active {
 	animation-name: hs-in-wipe-l
 }
 
-:where([dir="rtl"]) .hs-hero.is-back .hs-fx-wipe.is-active {
+.hs-hero.is-back:where([dir="rtl"]) .hs-fx-wipe.is-active {
 	animation-name: hs-in-wipe-r
 }
 
@@ -750,7 +750,7 @@
 	object-fit: contain
 }
 
-:where([dir="rtl"]) .hs-hero .hs-ico {
+.hs-hero:where([dir="rtl"]) .hs-ico {
 	transform: scaleX(-1)
 }
 
@@ -767,8 +767,7 @@
 
 .hs-hero .hs-thumbs {
 	display: flex;
-	gap: var(--hs-thumb-gap, 20px);
-	direction: ltr
+	gap: var(--hs-thumb-gap, 20px)
 }
 
 .hs-hero .hs-thumb {

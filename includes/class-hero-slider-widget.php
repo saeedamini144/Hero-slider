@@ -126,9 +126,78 @@ class Hero_Slider_Widget extends Widget_Base {
 		return $sizes;
 	}
 
+	/**
+	 * Whether the site's core language is right-to-left.
+	 *
+	 * On the frontend (including the Elementor preview) the current locale is the
+	 * site locale. In wp-admin (the Elementor editor) WordPress uses the user's
+	 * profile language, so we briefly switch to the site locale to read its direction.
+	 */
+	public static function site_is_rtl() {
+		static $cache = [];
+		$locale = get_locale();
+
+		if ( ! isset( $cache[ $locale ] ) ) {
+			if ( ! is_admin() || get_user_locale() === $locale ) {
+				$rtl = is_rtl();
+			} else {
+				$switched = switch_to_locale( $locale );
+				$rtl      = is_rtl();
+				if ( $switched ) {
+					restore_previous_locale();
+				}
+			}
+			/** Filters the direction the slider uses in "auto" mode. */
+			$cache[ $locale ] = (bool) apply_filters( 'hs_hero_slider_is_rtl', $rtl, $locale );
+		}
+
+		return $cache[ $locale ];
+	}
+
+	/** Resolve the direction for this widget: the "direction" setting or the site language. */
+	private static function resolve_dir( $setting ) {
+		if ( 'rtl' === $setting || 'ltr' === $setting ) {
+			return $setting;
+		}
+		return self::site_is_rtl() ? 'rtl' : 'ltr';
+	}
+
+	private static function site_is_persian() {
+		return 0 === strpos( get_locale(), 'fa' );
+	}
+
+	/** Visitor-facing strings (screen reader labels) in the site language. */
+	private static function front_text() {
+		if ( self::site_is_persian() ) {
+			return [
+				'slider' => 'اسلایدر',
+				'prev'   => 'اسلاید قبلی',
+				'next'   => 'اسلاید بعدی',
+				/* translators: %d: slide number */
+				'slide'  => 'اسلاید %d',
+				/* translators: %d: slide number */
+				'goto'   => 'رفتن به اسلاید %d',
+				/* translators: 1: slide number, 2: total slides */
+				'of'     => '%1$d از %2$d',
+			];
+		}
+
+		return [
+			'slider' => __( 'Slider', 'hero-slider' ),
+			'prev'   => __( 'Previous slide', 'hero-slider' ),
+			'next'   => __( 'Next slide', 'hero-slider' ),
+			/* translators: %d: slide number */
+			'slide'  => __( 'Slide %d', 'hero-slider' ),
+			/* translators: %d: slide number */
+			'goto'   => __( 'Go to slide %d', 'hero-slider' ),
+			/* translators: 1: slide number, 2: total slides */
+			'of'     => __( '%1$d of %2$d', 'hero-slider' ),
+		];
+	}
+
 	/** Start / center / end choices with icons that follow the site direction. */
 	private static function align_choices() {
-		$rtl = is_rtl();
+		$rtl = self::site_is_rtl();
 		return [
 			'start'  => [
 				'title' => esc_html__( 'ابتدا', 'hero-slider' ),
@@ -151,12 +220,23 @@ class Hero_Slider_Widget extends Widget_Base {
 
 	private function default_slides() {
 		$placeholder = [ 'url' => Utils::get_placeholder_image_src() ];
-		$items       = [
-			[ 'دکوراسیون داخلی مینیمال', "طراحی با\nهدف", 'هر قطعه در فضای شما باید دلیلی برای بودن داشته باشد. ما خانه‌هایی می‌سازیم آرام، کاربردی و ماندگار؛ با متریال طبیعی و رنگ‌هایی که چشم را خسته نمی‌کنند.', 'ایده‌های طراحی را ببینید' ],
-			[ 'نشیمن و پذیرایی', "آرامش در\nجزئیات", 'چیدمانی که با نور روز هماهنگ است و جای نفس کشیدن دارد. مبلمان کم‌حجم، بافت‌های گرم و فضای خالیِ حساب‌شده.', 'نمونه‌کارهای نشیمن' ],
-			[ 'سرویس و حمام', "سادگی\nماندگار", 'خطوط تمیز، سطوح یکدست و نگهداری آسان. حمامی که هر روز صبح حس تازگی می‌دهد.', 'طرح‌های حمام' ],
-			[ 'مشاوره رایگان', "خانه‌ای که\nشبیه شماست", 'از اولین طرح تا اجرای نهایی کنارتان هستیم. سبک زندگی‌تان را بگویید، بقیه‌اش با ما.', 'درخواست مشاوره' ],
-		];
+
+		// Demo content in the site language: Persian for fa_* sites, English otherwise.
+		if ( self::site_is_persian() ) {
+			$items = [
+				[ 'دکوراسیون داخلی مینیمال', "طراحی با\nهدف", 'هر قطعه در فضای شما باید دلیلی برای بودن داشته باشد. ما خانه‌هایی می‌سازیم آرام، کاربردی و ماندگار؛ با متریال طبیعی و رنگ‌هایی که چشم را خسته نمی‌کنند.', 'ایده‌های طراحی را ببینید' ],
+				[ 'نشیمن و پذیرایی', "آرامش در\nجزئیات", 'چیدمانی که با نور روز هماهنگ است و جای نفس کشیدن دارد. مبلمان کم‌حجم، بافت‌های گرم و فضای خالیِ حساب‌شده.', 'نمونه‌کارهای نشیمن' ],
+				[ 'سرویس و حمام', "سادگی\nماندگار", 'خطوط تمیز، سطوح یکدست و نگهداری آسان. حمامی که هر روز صبح حس تازگی می‌دهد.', 'طرح‌های حمام' ],
+				[ 'مشاوره رایگان', "خانه‌ای که\nشبیه شماست", 'از اولین طرح تا اجرای نهایی کنارتان هستیم. سبک زندگی‌تان را بگویید، بقیه‌اش با ما.', 'درخواست مشاوره' ],
+			];
+		} else {
+			$items = [
+				[ 'Minimal interior design', "Design with\npurpose", 'Every piece in your space should have a reason to be there. We create calm, functional and lasting homes with natural materials and easy-on-the-eye colors.', 'See design ideas' ],
+				[ 'Living & dining', "Calm in the\ndetails", 'Layouts that follow the daylight and leave room to breathe: light furniture, warm textures and carefully planned empty space.', 'Living room projects' ],
+				[ 'Bath & spa', "Simplicity\nthat lasts", 'Clean lines, seamless surfaces and easy upkeep. A bathroom that feels fresh every morning.', 'Bathroom designs' ],
+				[ 'Free consultation', "A home that\nfeels like you", 'We are with you from the first sketch to the final build. Tell us how you live; we will take care of the rest.', 'Book a consultation' ],
+			];
+		}
 
 		$slides = [];
 		foreach ( $items as $item ) {
@@ -609,10 +689,24 @@ class Hero_Slider_Widget extends Widget_Base {
 			'prefix_class' => 'hs-stack-',
 		] );
 
+		$this->add_control( 'direction', [
+			'label'       => esc_html__( 'جهت اسلایدر', 'hero-slider' ),
+			'type'        => Controls_Manager::SELECT,
+			'default'     => 'auto',
+			'options'     => [
+				'auto' => self::site_is_rtl()
+					? esc_html__( 'خودکار (زبان سایت: راست‌چین)', 'hero-slider' )
+					: esc_html__( 'خودکار (زبان سایت: چپ‌چین)', 'hero-slider' ),
+				'rtl'  => esc_html__( 'راست‌چین (RTL)', 'hero-slider' ),
+				'ltr'  => esc_html__( 'چپ‌چین (LTR)', 'hero-slider' ),
+			],
+			'description' => esc_html__( 'در حالت خودکار، جهت از زبان اصلی سایت (تنظیمات › عمومی › زبان سایت) گرفته می‌شود.', 'hero-slider' ),
+		] );
+
 		$this->add_control( 'aria_label', [
-			'label'   => esc_html__( 'برچسب دسترسی‌پذیری', 'hero-slider' ),
-			'type'    => Controls_Manager::TEXT,
-			'default' => esc_html__( 'اسلایدر اصلی', 'hero-slider' ),
+			'label'       => esc_html__( 'برچسب دسترسی‌پذیری', 'hero-slider' ),
+			'type'        => Controls_Manager::TEXT,
+			'placeholder' => self::front_text()['slider'],
 		] );
 
 		$this->end_controls_section();
@@ -1498,6 +1592,8 @@ class Hero_Slider_Widget extends Widget_Base {
 		$t_tag    = self::valid_tag( $s['title_tag'], 'h2' );
 		$st_tag   = self::valid_tag( $s['subtitle_tag'], 'p' );
 		$btn_icon = $this->icon_html( $s['button_icon'] ?? [], self::SVG_NEXT );
+		$dir      = self::resolve_dir( $s['direction'] ?? 'auto' );
+		$txt      = self::front_text();
 
 		$config = [
 			'autoplay'     => $autoplay,
@@ -1519,7 +1615,8 @@ class Hero_Slider_Widget extends Widget_Base {
 		$this->add_render_attribute( 'root', [
 			'class'                => $classes,
 			'aria-roledescription' => 'carousel',
-			'aria-label'           => $s['aria_label'] ? $s['aria_label'] : esc_html__( 'اسلایدر', 'hero-slider' ),
+			'dir'                  => $dir,
+			'aria-label'           => $s['aria_label'] ? $s['aria_label'] : $txt['slider'],
 			'data-hs'              => wp_json_encode( $config ),
 			'style'                => '--hs-delay:' . $delay . 'ms',
 		] );
@@ -1555,7 +1652,7 @@ class Hero_Slider_Widget extends Widget_Base {
 					foreach ( $slides as $i => $slide ) :
 						$active = 0 === $i;
 						/* translators: 1: slide number, 2: total slides */
-						$label = sprintf( esc_html__( '%1$d از %2$d', 'hero-slider' ), $i + 1, $count );
+						$label = sprintf( $txt['of'], $i + 1, $count );
 						?>
 						<div class="hs-content elementor-repeater-item-<?php echo esc_attr( $slide['_id'] ); ?><?php echo $active ? ' is-active' : ''; ?>" role="group" aria-roledescription="slide" aria-label="<?php echo esc_attr( $label ); ?>" aria-hidden="<?php echo $active ? 'false' : 'true'; ?>">
 							<?php if ( '' !== trim( (string) $slide['subtitle'] ) ) : ?>
@@ -1601,7 +1698,7 @@ class Hero_Slider_Widget extends Widget_Base {
 									$shown = $k >= 1 && $k <= $visible;
 									$name  = wp_strip_all_tags( $slide['title'] ? $slide['title'] : $slide['subtitle'] );
 									/* translators: %d: slide number */
-									$aria = sprintf( esc_html__( 'رفتن به اسلاید %d', 'hero-slider' ), $i + 1 ) . ( $name ? ': ' . $name : '' );
+									$aria = sprintf( $txt['goto'], $i + 1 ) . ( $name ? ': ' . $name : '' );
 									?>
 									<button type="button" class="hs-thumb<?php echo $shown ? ' is-visible' : ''; ?>" data-index="<?php echo (int) $i; ?>" aria-label="<?php echo esc_attr( $aria ); ?>"<?php echo $shown ? ' data-k="' . (int) $k . '" style="order:' . (int) $k . ';--k:' . (int) ( $k - 1 ) . '"' : ''; ?>>
 										<?php
@@ -1624,10 +1721,10 @@ class Hero_Slider_Widget extends Widget_Base {
 
 						<?php if ( $arrows ) : ?>
 							<div class="hs-nav">
-								<button type="button" class="hs-arrow hs-arrow--prev" aria-label="<?php echo esc_attr__( 'اسلاید قبلی', 'hero-slider' ); ?>">
+								<button type="button" class="hs-arrow hs-arrow--prev" aria-label="<?php echo esc_attr( $txt['prev'] ); ?>">
 									<?php echo $this->icon_html( $s['arrow_prev_icon'] ?? [], self::SVG_PREV ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</button>
-								<button type="button" class="hs-arrow hs-arrow--next" aria-label="<?php echo esc_attr__( 'اسلاید بعدی', 'hero-slider' ); ?>">
+								<button type="button" class="hs-arrow hs-arrow--next" aria-label="<?php echo esc_attr( $txt['next'] ); ?>">
 									<?php echo $this->icon_html( $s['arrow_next_icon'] ?? [], self::SVG_NEXT ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</button>
 							</div>
@@ -1640,7 +1737,7 @@ class Hero_Slider_Widget extends Widget_Base {
 				<div class="hs-dots">
 					<?php for ( $i = 0; $i < $count; $i++ ) : ?>
 						<?php /* translators: %d: slide number */ ?>
-						<button type="button" class="hs-dot<?php echo 0 === $i ? ' is-active' : ''; ?>" aria-label="<?php echo esc_attr( sprintf( __( 'اسلاید %d', 'hero-slider' ), $i + 1 ) ); ?>" aria-current="<?php echo 0 === $i ? 'true' : 'false'; ?>"></button>
+						<button type="button" class="hs-dot<?php echo 0 === $i ? ' is-active' : ''; ?>" aria-label="<?php echo esc_attr( sprintf( $txt['slide'], $i + 1 ) ); ?>" aria-current="<?php echo 0 === $i ? 'true' : 'false'; ?>"></button>
 					<?php endfor; ?>
 				</div>
 			<?php endif; ?>
@@ -1678,6 +1775,9 @@ class Hero_Slider_Widget extends Widget_Base {
 			var dots = multi && 'yes' === settings.show_dots;
 			var progress = autoplay && 'yes' === settings.show_progress;
 			var deco = 'yes' === settings.title_decoration;
+			var siteDir = '<?php echo self::site_is_rtl() ? 'rtl' : 'ltr'; ?>';
+			var dir = ( 'rtl' === settings.direction || 'ltr' === settings.direction ) ? settings.direction : siteDir;
+			var TXT = <?php echo wp_json_encode( self::front_text() ); ?>;
 			var thumbsN = Math.max( 1, Math.min( 6, parseInt( settings.thumbs_count, 10 ) || 3 ) );
 			var delay = Math.max( 1000, parseInt( settings.autoplay_delay, 10 ) || 6000 );
 			var tTag = TAGS.indexOf( settings.title_tag ) > -1 ? settings.title_tag : 'h2';
@@ -1715,7 +1815,7 @@ class Hero_Slider_Widget extends Widget_Base {
 			if ( ! autoplay ) { rootClass.push( 'is-paused' ); }
 			var visible = Math.min( thumbsN, count - 1 );
 			#>
-			<section class="{{ rootClass.join( ' ' ) }}" aria-roledescription="carousel" aria-label="{{ settings.aria_label }}" data-hs="{{ JSON.stringify( config ) }}" style="--hs-delay:{{ delay }}ms">
+			<section class="{{ rootClass.join( ' ' ) }}" dir="{{ dir }}" aria-roledescription="carousel" aria-label="{{ settings.aria_label || TXT.slider }}" data-hs="{{ JSON.stringify( config ) }}" style="--hs-delay:{{ delay }}ms">
 				<div class="hs-slides">
 					<# _.each( slides, function( slide, i ) {
 						var fx = FX.indexOf( slide.transition ) > -1 ? slide.transition : gFx;
@@ -1737,7 +1837,7 @@ class Hero_Slider_Widget extends Widget_Base {
 						<# _.each( slides, function( slide, i ) {
 							var active = 0 === i;
 						#>
-						<div class="hs-content elementor-repeater-item-{{ slide._id }}{{ active ? ' is-active' : '' }}" role="group" aria-roledescription="slide" aria-label="{{ i + 1 }} / {{ count }}" aria-hidden="{{ active ? 'false' : 'true' }}">
+						<div class="hs-content elementor-repeater-item-{{ slide._id }}{{ active ? ' is-active' : '' }}" role="group" aria-roledescription="slide" aria-label="{{ TXT.of.replace( '%1$d', i + 1 ).replace( '%2$d', count ) }}" aria-hidden="{{ active ? 'false' : 'true' }}">
 							<# if ( slide.subtitle && slide.subtitle.trim() ) { #>
 								<{{ stTag }} class="hs-subtitle">{{ slide.subtitle }}</{{ stTag }}>
 							<# } #>
@@ -1768,7 +1868,7 @@ class Hero_Slider_Widget extends Widget_Base {
 							<# _.each( slides, function( slide, i ) {
 								var shown = i >= 1 && i <= visible;
 							#>
-							<button type="button" class="hs-thumb{{ shown ? ' is-visible' : '' }}" data-index="{{ i }}" aria-label="{{ i + 1 }}"<# if ( shown ) { #> data-k="{{ i }}" style="order:{{ i }};--k:{{ i - 1 }}"<# } #>>
+							<button type="button" class="hs-thumb{{ shown ? ' is-visible' : '' }}" data-index="{{ i }}" aria-label="{{ TXT.goto.replace( '%d', i + 1 ) }}"<# if ( shown ) { #> data-k="{{ i }}" style="order:{{ i }};--k:{{ i - 1 }}"<# } #>>
 								<# if ( slide.image && slide.image.url ) { #>
 									<img class="hs-thumb__img" src="{{ slide.image.url }}" alt="" loading="lazy">
 								<# } #>
@@ -1779,8 +1879,8 @@ class Hero_Slider_Widget extends Widget_Base {
 
 						<# if ( arrows ) { #>
 						<div class="hs-nav">
-							<button type="button" class="hs-arrow hs-arrow--prev" aria-label="<?php echo esc_attr__( 'اسلاید قبلی', 'hero-slider' ); ?>">{{{ hsIcon( settings.arrow_prev_icon, SVG_PREV ) }}}</button>
-							<button type="button" class="hs-arrow hs-arrow--next" aria-label="<?php echo esc_attr__( 'اسلاید بعدی', 'hero-slider' ); ?>">{{{ hsIcon( settings.arrow_next_icon, SVG_NEXT ) }}}</button>
+							<button type="button" class="hs-arrow hs-arrow--prev" aria-label="{{ TXT.prev }}">{{{ hsIcon( settings.arrow_prev_icon, SVG_PREV ) }}}</button>
+							<button type="button" class="hs-arrow hs-arrow--next" aria-label="{{ TXT.next }}">{{{ hsIcon( settings.arrow_next_icon, SVG_NEXT ) }}}</button>
 						</div>
 						<# } #>
 					</div>
@@ -1790,7 +1890,7 @@ class Hero_Slider_Widget extends Widget_Base {
 				<# if ( dots ) { #>
 				<div class="hs-dots">
 					<# for ( var d = 0; d < count; d++ ) { #>
-						<button type="button" class="hs-dot{{ 0 === d ? ' is-active' : '' }}" aria-label="{{ d + 1 }}" aria-current="{{ 0 === d ? 'true' : 'false' }}"></button>
+						<button type="button" class="hs-dot{{ 0 === d ? ' is-active' : '' }}" aria-label="{{ TXT.slide.replace( '%d', d + 1 ) }}" aria-current="{{ 0 === d ? 'true' : 'false' }}"></button>
 					<# } #>
 				</div>
 				<# } #>

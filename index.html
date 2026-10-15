@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hero Slider Demo</title>
+<meta name="description" content="Live demo of the Hero Slider for Elementor widget.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
+<!-- The real plugin stylesheet: the demo shows exactly what the widget renders. -->
+<link rel="stylesheet" href="assets/css/hero-slider.css">
+<style>
+	:root {
+		--demo-bg: #ede7e0;
+		--demo-card: #ffffff;
+		--demo-ink: #151515;
+		--demo-muted: #6f6a64;
+		--demo-line: #e2dbd2;
+		--demo-accent: #7a7150;
+	}
+	*, *::before, *::after { box-sizing: border-box; }
+	html, body { margin: 0; }
+	body {
+		font-family: "Vazirmatn", Tahoma, system-ui, sans-serif;
+		background: var(--demo-bg);
+		color: var(--demo-ink);
+	}
+
+	/* ---------- Demo settings panel (not part of the plugin) ---------- */
+	.demo-panel {
+		position: fixed;
+		z-index: 50;
+		top: 16px;
+		inset-inline-end: 16px;
+		width: min(300px, calc(100vw - 32px));
+		/* Starts collapsed so it does not cover the thumbnails; click to open. */
+		max-height: calc(100vh - 32px);
+		overflow: auto;
+		background: var(--demo-card);
+		border: 1px solid var(--demo-line);
+		border-radius: 12px;
+		box-shadow: 0 18px 40px -20px rgba(40, 30, 20, .45);
+		font-size: 13px;
+	}
+	.demo-panel summary {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		padding: 12px 14px;
+		cursor: pointer;
+		font-weight: 700;
+		list-style: none;
+	}
+	.demo-panel summary::-webkit-details-marker { display: none; }
+	.demo-panel summary::after {
+		content: "";
+		width: 8px;
+		height: 8px;
+		border-right: 2px solid currentColor;
+		border-bottom: 2px solid currentColor;
+		margin-top: -4px;
+		transform: rotate(45deg);
+		transition: transform .2s;
+	}
+	.demo-panel[open] summary::after { margin-top: 4px; transform: rotate(-135deg); }
+	.demo-panel[open] summary { border-bottom: 1px solid var(--demo-line); }
+	.demo-body { display: grid; gap: 12px; padding: 14px; }
+	.demo-field { display: grid; gap: 6px; }
+	.demo-field > span { color: var(--demo-muted); font-weight: 500; }
+	.demo-field select,
+	.demo-field input[type="range"] { width: 100%; font: inherit; }
+	.demo-field select {
+		padding: 7px 10px;
+		border: 1px solid var(--demo-line);
+		border-radius: 8px;
+		background: #faf8f5;
+		color: var(--demo-ink);
+	}
+	.demo-check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+	.demo-row { display: flex; justify-content: space-between; color: var(--demo-muted); }
+	.demo-panel input[type="range"] { accent-color: var(--demo-accent); }
+	.demo-panel input[type="checkbox"] { accent-color: var(--demo-accent); width: 16px; height: 16px; }
+
+	/* ---------- Footer ---------- */
+	.demo-footer {
+		max-width: 760px;
+		margin: 0 auto;
+		padding: 56px 20px 64px;
+		text-align: center;
+		color: var(--demo-muted);
+		line-height: 2;
+	}
+	.demo-footer h2 { margin: 0 0 8px; color: var(--demo-ink); font-size: 22px; }
+	.demo-footer p { margin: 0; }
+	.demo-footer a { color: var(--demo-accent); }
+</style>
+<script>
+	// Language / direction comes from ?lang=en (LTR) or the default Persian (RTL),
+	// mirroring how the widget follows the WordPress site language.
+	(function () {
+		var lang = new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'fa';
+		document.documentElement.lang = lang;
+		document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
+	})();
+</script>
+</head>
+<body>
+
+<main>
+	<!-- Same wrapper Elementor outputs; its classes are what the widget's "prefix_class" controls toggle. -->
+	<div id="demo-widget" class="elementor-element elementor-widget-hs-hero-slider hs-ov-yes hs-btn-style-boxed hs-btn-icon-after hs-btn-fx-icon hs-btn-full-yes hs-stack-mobile"></div>
+</main>
+
+<details class="demo-panel" id="demo-panel">
+	<summary id="demo-title"></summary>
+	<div class="demo-body">
+		<label class="demo-field"><span data-t="lang"></span>
+			<select id="opt-lang">
+				<option value="fa">فارسی — راست‌چین (RTL)</option>
+				<option value="en">English — Left to right (LTR)</option>
+			</select>
+		</label>
+		<label class="demo-field"><span data-t="fx"></span><select id="opt-fx"></select></label>
+		<label class="demo-field"><span data-t="mo"></span><select id="opt-mo"></select></label>
+		<label class="demo-field"><span data-t="anim"></span><select id="opt-anim"></select></label>
+		<label class="demo-field"><span data-t="hover"></span><select id="opt-hover"></select></label>
+		<label class="demo-field"><span data-t="icon"></span><select id="opt-icon"></select></label>
+		<label class="demo-field">
+			<span class="demo-row"><span data-t="speed"></span><output id="opt-speed-out"></output></span>
+			<input type="range" id="opt-speed" min="300" max="2500" step="100">
+		</label>
+		<label class="demo-check"><input type="checkbox" id="opt-overlay"> <span data-t="overlay"></span></label>
+	</div>
+</details>
+
+<footer class="demo-footer">
+	<h2 id="foot-title"></h2>
+	<p id="foot-text"></p>
+</footer>
+
+<script>
+(function () {
+	'use strict';
+
+	var params = new URLSearchParams(location.search);
+	var LANG = document.documentElement.lang === 'en' ? 'en' : 'fa';
+	var DIR = LANG === 'en' ? 'ltr' : 'rtl';
+
+	var SVG_NEXT = '<svg class="hs-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+	var SVG_PREV = '<svg class="hs-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
+
+	var IMAGES = [
+		'photo-1616486338812-3dadae4b4ace',
+		'photo-1618220179428-22790b461013',
+		'photo-1552321554-5fefe8c9ef14',
+		'photo-1600210492486-724fe5c67fb0'
+	];
+	function img(id, w) {
+		return 'https://images.unsplash.com/' + id + '?w=' + w + '&q=80&auto=format&fit=crop';
+	}
+
+	var SLIDES = {
+		fa: [
+			['دکوراسیون داخلی مینیمال', 'طراحی با<br>هدف', 'هر قطعه در فضای شما باید دلیلی برای بودن داشته باشد. ما خانه‌هایی می‌سازیم آرام، کاربردی و ماندگار؛ با متریال طبیعی و رنگ‌هایی که چشم را خسته نمی‌کنند.', 'ایده‌های طراحی را ببینید'],
+			['نشیمن و پذیرایی', 'آرامش در<br>جزئیات', 'چیدمانی که با نور روز هماهنگ است و جای نفس کشیدن دارد. مبلمان کم‌حجم، بافت‌های گرم و فضای خالیِ حساب‌شده.', 'نمونه‌کارهای نشیمن'],
+			['سرویس و حمام', 'سادگی<br>ماندگار', 'خطوط تمیز، سطوح یکدست و نگهداری آسان. حمامی که هر روز صبح حس تازگی می‌دهد.', 'طرح‌های حمام'],
+			['مشاوره رایگان', 'خانه‌ای که<br>شبیه شماست', 'از اولین طرح تا اجرای نهایی کنارتان هستیم. سبک زندگی‌تان را بگویید، بقیه‌اش با ما.', 'درخواست مشاوره']
+		],
+		en: [
+			['Minimal interior design', 'Design with<br>purpose', 'Every piece in your space should have a reason to be there. We create calm, functional and lasting homes with natural materials and easy-on-the-eye colors.', 'See design ideas'],
+			['Living &amp; dining', 'Calm in the<br>details', 'Layouts that follow the daylight and leave room to breathe: light furniture, warm textures and carefully planned empty space.', 'Living room projects'],
+			['Bath &amp; spa', 'Simplicity<br>that lasts', 'Clean lines, seamless surfaces and easy upkeep. A bathroom that feels fresh every morning.', 'Bathroom designs'],
+			['Free consultation', 'A home that<br>feels like you', 'We are with you from the first sketch to the final build. Tell us how you live; we will take care of the rest.', 'Book a consultation']
+		]
+	}[LANG];
+
+	// Option lists match the widget's controls.
+	var OPTIONS = {
+		fx: {
+			fa: { fade: 'محو شدن (Fade)', slide: 'اسلاید افقی', 'slide-v': 'اسلاید عمودی', 'zoom-in': 'زوم به داخل', 'zoom-out': 'زوم به بیرون', blur: 'محو با بلور', circle: 'آشکارسازی دایره‌ای', wipe: 'پرده کشویی (Wipe)', curtain: 'پرده از وسط', diamond: 'آشکارسازی لوزی', rotate: 'چرخش و زوم', none: 'بدون افکت' },
+			en: { fade: 'Fade', slide: 'Slide (horizontal)', 'slide-v': 'Slide (vertical)', 'zoom-in': 'Zoom in', 'zoom-out': 'Zoom out', blur: 'Blur', circle: 'Circle reveal', wipe: 'Wipe', curtain: 'Curtain', diamond: 'Diamond reveal', rotate: 'Rotate & zoom', none: 'None' }
+		},
+		mo: {
+			fa: { none: 'بدون حرکت', 'zoom-in': 'زوم آرام به داخل', 'zoom-out': 'زوم آرام به بیرون', 'pan-left': 'حرکت به چپ', 'pan-right': 'حرکت به راست', 'pan-up': 'حرکت به بالا', 'pan-down': 'حرکت به پایین', 'ken-burns': 'کن برنز' },
+			en: { none: 'None', 'zoom-in': 'Slow zoom in', 'zoom-out': 'Slow zoom out', 'pan-left': 'Pan left', 'pan-right': 'Pan right', 'pan-up': 'Pan up', 'pan-down': 'Pan down', 'ken-burns': 'Ken Burns' }
+		},
+		anim: {
+			fa: { rise: 'بالا آمدن', fade: 'محو شدن', slide: 'ورود از کنار', zoom: 'زوم', blur: 'بلور', reveal: 'آشکارسازی (Mask)', none: 'بدون انیمیشن' },
+			en: { rise: 'Rise', fade: 'Fade', slide: 'Slide in', zoom: 'Zoom', blur: 'Blur', reveal: 'Reveal (mask)', none: 'None' }
+		},
+		hover: {
+			fa: { none: 'بدون افکت', icon: 'حرکت آیکن', grow: 'بزرگ شدن', shrink: 'کوچک شدن', float: 'شناور', shine: 'درخشش', fill: 'پر شدن رنگ', pulse: 'پالس' },
+			en: { none: 'None', icon: 'Icon nudge', grow: 'Grow', shrink: 'Shrink', float: 'Float', shine: 'Shine', fill: 'Color fill', pulse: 'Pulse' }
+		},
+		icon: {
+			fa: { boxed: 'داخل کادر جدا', inline: 'کنار متن' },
+			en: { boxed: 'Separate box', inline: 'Inline with text' }
+		}
+	};
+
+	var T = {
+		fa: {
+			title: 'تنظیمات دمو', lang: 'زبان و جهت', fx: 'افکت تعویض اسلاید', mo: 'حرکت تصویر', anim: 'انیمیشن محتوا',
+			hover: 'افکت هاور دکمه', icon: 'سبک آیکن دکمه', speed: 'سرعت افکت', overlay: 'لایه خوانایی سمت متن', ms: 'میلی‌ثانیه',
+			slider: 'اسلایدر', prev: 'اسلاید قبلی', next: 'اسلاید بعدی', slide: 'اسلاید %d', goto: 'رفتن به اسلاید %d', of: '%1 از %2',
+			footTitle: 'Hero Slider for Elementor',
+			footText: 'این صفحه دمویی از ویجت است و از همان فایل‌های CSS و JS افزونه استفاده می‌کند. در وردپرس، همه این گزینه‌ها و تنظیمات بیشتر از پنل المنتور قابل تغییرند. برای دیدن رفتار موبایل، عرض پنجره را کم کنید.'
+		},
+		en: {
+			title: 'Demo settings', lang: 'Language & direction', fx: 'Slide transition', mo: 'Image motion', anim: 'Content animation',
+			hover: 'Button hover effect', icon: 'Button icon style', speed: 'Transition speed', overlay: 'Readability overlay', ms: 'ms',
+			slider: 'Slider', prev: 'Previous slide', next: 'Next slide', slide: 'Slide %d', goto: 'Go to slide %d', of: '%1 of %2',
+			footTitle: 'Hero Slider for Elementor',
+			footText: 'This page is a demo of the widget and uses the plugin’s own CSS and JS files. In WordPress, all of these options and many more are set from the Elementor panel. Narrow the window to see the mobile layout.'
+		}
+	}[LANG];
+
+	function pick(name, fallback) {
+		var v = params.get(name);
+		return v && OPTIONS[name][LANG][v] ? v : fallback;
+	}
+
+	var state = {
+		fx: pick('fx', 'fade'),
+		mo: pick('mo', 'zoom-out'),
+		anim: pick('anim', 'rise'),
+		hover: pick('hover', 'icon'),
+		icon: pick('icon', 'boxed'),
+		speed: Math.min(2500, Math.max(300, parseInt(params.get('speed'), 10) || 1100)),
+		overlay: params.get('overlay') !== '0'
+	};
+
+	/* ---------- Build the widget markup (same structure as the PHP render()) ---------- */
+	var count = SLIDES.length, THUMBS = 3, visible = Math.min(THUMBS, count - 1);
+	var config = { autoplay: true, delay: 6000, pauseOnHover: true, keyboard: true, swipe: true, thumbs: THUMBS };
+
+	var bgs = '', contents = '', thumbs = '', dots = '';
+	SLIDES.forEach(function (s, i) {
+		var first = i === 0;
+		bgs += '<div class="hs-bg hs-fx-' + state.fx + ' hs-mo-' + state.mo + ' elementor-repeater-item-' + i + (first ? ' is-active' : '') + '">' +
+			'<img class="hs-bg__img" src="' + img(IMAGES[i], 1920) + '" alt="" ' + (first ? 'loading="eager" fetchpriority="high"' : 'loading="lazy" decoding="async"') + '>' +
+			'</div>';
+
+		contents += '<div class="hs-content elementor-repeater-item-' + i + (first ? ' is-active' : '') + '" role="group" aria-roledescription="slide" aria-label="' + T.of.replace('%1', i + 1).replace('%2', count) + '" aria-hidden="' + (first ? 'false' : 'true') + '">' +
+			'<p class="hs-subtitle">' + s[0] + '</p>' +
+			'<h2 class="hs-title">' + s[1] + '</h2>' +
+			'<div class="hs-desc">' + s[2] + '</div>' +
+			'<a class="hs-btn" href="#"><span class="hs-btn__label">' + s[3] + '</span><span class="hs-btn__icon" aria-hidden="true"><span class="hs-btn__i">' + SVG_NEXT + '</span></span></a>' +
+			'</div>';
+
+		var shown = i >= 1 && i <= visible;
+		thumbs += '<button type="button" class="hs-thumb' + (shown ? ' is-visible' : '') + '" data-index="' + i + '" aria-label="' + T.goto.replace('%d', i + 1) + '"' +
+			(shown ? ' data-k="' + i + '" style="order:' + i + ';--k:' + (i - 1) + '"' : '') + '>' +
+			'<img class="hs-thumb__img" src="' + img(IMAGES[i], 420) + '" alt="" loading="lazy" decoding="async">' +
+			'</button>';
+
+		dots += '<button type="button" class="hs-dot' + (first ? ' is-active' : '') + '" aria-label="' + T.slide.replace('%d', i + 1) + '" aria-current="' + (first ? 'true' : 'false') + '"></button>';
+	});
+
+	var widget = document.getElementById('demo-widget');
+	widget.innerHTML =
+		'<section class="hs-hero hs-canim-' + state.anim + '" dir="' + DIR + '" aria-roledescription="carousel" aria-label="' + T.slider + '"' +
+		' data-hs=\'' + JSON.stringify(config) + '\' style="--hs-delay:' + config.delay + 'ms;--hs-speed:' + state.speed + 'ms">' +
+			'<div class="hs-slides">' + bgs + '</div>' +
+			'<div class="hs-inner">' +
+				'<div class="hs-contents" aria-live="off">' + contents + '</div>' +
+				'<div class="hs-side">' +
+					'<div class="hs-thumbs">' + thumbs + '</div>' +
+					'<div class="hs-nav">' +
+						'<button type="button" class="hs-arrow hs-arrow--prev" aria-label="' + T.prev + '">' + SVG_PREV + '</button>' +
+						'<button type="button" class="hs-arrow hs-arrow--next" aria-label="' + T.next + '">' + SVG_NEXT + '</button>' +
+					'</div>' +
+				'</div>' +
+			'</div>' +
+			'<div class="hs-dots">' + dots + '</div>' +
+			'<div class="hs-progress" aria-hidden="true"><span class="hs-progress__bar"></span></div>' +
+		'</section>';
+
+	function swapClass(el, prefix, value) {
+		el.className = el.className.split(' ').filter(function (c) { return c.indexOf(prefix) !== 0; }).concat(prefix + value).join(' ');
+	}
+	swapClass(widget, 'hs-btn-fx-', state.hover);
+	swapClass(widget, 'hs-btn-style-', state.icon);
+	widget.classList.toggle('hs-ov-yes', state.overlay);
+
+	/* ---------- Texts ---------- */
+	document.getElementById('demo-title').textContent = T.title;
+	document.querySelectorAll('[data-t]').forEach(function (el) { el.textContent = T[el.getAttribute('data-t')]; });
+	document.getElementById('foot-title').textContent = T.footTitle;
+	document.getElementById('foot-text').textContent = T.footText;
+
+	/* ---------- Panel ---------- */
+	['fx', 'mo', 'anim', 'hover', 'icon'].forEach(function (name) {
+		var select = document.getElementById('opt-' + name), list = OPTIONS[name][LANG];
+		Object.keys(list).forEach(function (key) { select.add(new Option(list[key], key, false, key === state[name])); });
+	});
+	document.getElementById('opt-lang').value = LANG;
+	document.getElementById('opt-speed').value = state.speed;
+	document.getElementById('opt-speed-out').textContent = state.speed + ' ' + T.ms;
+	document.getElementById('opt-overlay').checked = state.overlay;
+
+	window.__hsDemo = { state: state, swapClass: swapClass, widget: widget };
+})();
+</script>
+
+<!-- The real plugin script. Without Elementor it mounts on DOMContentLoaded. -->
+<script src="assets/js/hero-slider.js"></script>
+
+<script>
+(function () {
+	'use strict';
+
+	var demo = window.__hsDemo, state = demo.state, widget = demo.widget;
+	var root = widget.querySelector('.hs-hero');
+
+	function saveUrl() {
+		var p = new URLSearchParams(location.search);
+		Object.keys(state).forEach(function (k) {
+			p.set(k, k === 'overlay' ? (state.overlay ? '1' : '0') : state[k]);
+		});
+		history.replaceState(null, '', '?' + p.toString());
+	}
+
+	// Show the new effect right away by moving to the next slide.
+	function preview() {
+		var next = root.querySelector('.hs-arrow--next');
+		if (next) next.click();
+	}
+
+	function bind(id, apply, showNow) {
+		var el = document.getElementById(id);
+		el.addEventListener('change', function () {
+			apply(el);
+			saveUrl();
+			if (showNow) preview();
+		});
+	}
+
+	bind('opt-lang', function (el) {
+		var p = new URLSearchParams(location.search);
+		p.set('lang', el.value);
+		location.search = p.toString();
+	});
+
+	bind('opt-fx', function (el) {
+		state.fx = el.value;
+		root.querySelectorAll('.hs-bg').forEach(function (bg) { demo.swapClass(bg, 'hs-fx-', state.fx); });
+	}, true);
+
+	bind('opt-mo', function (el) {
+		state.mo = el.value;
+		root.querySelectorAll('.hs-bg').forEach(function (bg) { demo.swapClass(bg, 'hs-mo-', state.mo); });
+	}, true);
+
+	bind('opt-anim', function (el) {
+		state.anim = el.value;
+		demo.swapClass(root, 'hs-canim-', state.anim);
+	}, true);
+
+	bind('opt-hover', function (el) {
+		state.hover = el.value;
+		demo.swapClass(widget, 'hs-btn-fx-', state.hover);
+	});
+
+	bind('opt-icon', function (el) {
+		state.icon = el.value;
+		demo.swapClass(widget, 'hs-btn-style-', state.icon);
+	});
+
+	bind('opt-overlay', function (el) {
+		state.overlay = el.checked;
+		widget.classList.toggle('hs-ov-yes', state.overlay);
+	});
+
+	var speed = document.getElementById('opt-speed');
+	speed.addEventListener('input', function () {
+		state.speed = +speed.value;
+		root.style.setProperty('--hs-speed', state.speed + 'ms');
+		document.getElementById('opt-speed-out').textContent = state.speed + ' ' + document.getElementById('opt-speed-out').textContent.split(' ').pop();
+	});
+	speed.addEventListener('change', function () { saveUrl(); preview(); });
+})();
+</script>
+</body>
+</html>
